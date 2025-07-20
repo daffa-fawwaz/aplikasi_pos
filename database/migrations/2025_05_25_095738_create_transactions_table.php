@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('nama_pembeli')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('alamat')->nullable();
             $table->integer('jumlah');
             $table->decimal('total_harga', 12, 2);
-            $table->decimal('harga_kulak', 12, 2)->nullable();
+            $table->decimal('harga_satuan', 12, 2)->nullable();
             $table->date('tanggal')->nullable();
             $table->timestamps();
         });

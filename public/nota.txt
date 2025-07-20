@@ -1,0 +1,23 @@
+              TOKO MAKMUR JAYA
+           Jl. Contoh No. 123, Jakarta
+            Telp: 0812-3456-7890
+
+========================================
+Tanggal : 15-07-2025 14:01
+Kasir   : Admin
+Pembeli : soni stiawan
+No HP   : 00000000
+Alamat  : Ngunut
+========================================
+No  Nama Barang         Qty  Harga     Total
+----------------------------------------
+1   DISPENSER MIYAKO      1  200.000   200.000
+----------------------------------------
+TOTAL BAYAR                    Rp 200.000
+========================================
+
+Terima kasih atas kunjungannya.
+Barang yang sudah dibeli
+tidak dapat ditukar atau dikembalikan.
+
+              ~ Semoga puas ~

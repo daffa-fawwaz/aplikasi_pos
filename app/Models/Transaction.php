@@ -10,7 +10,7 @@ class Transaction extends Model
         'item_id',
         'jumlah',
         'total_harga',
-        'harga_kulak',
+        'harga_satuan',
         'tanggal',
     ];
 

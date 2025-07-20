@@ -24,3 +24,4 @@ Route::post('/cart/add/{item}', [CartController::class, 'add'])->name('cart.add'
 Route::post('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/cart/nota/{transaction}', [CartController::class, 'printNota'])->name('cart.nota');
+Route::put('/cart/update-harga/{id}', [CartController::class, 'updateHarga'])->name('cart.updateHarga');

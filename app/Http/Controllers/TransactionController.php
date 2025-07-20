@@ -58,10 +58,13 @@ class TransactionController extends Controller
         $bulanIni = Carbon::now()->month;
         $tahunIni = Carbon::now()->year;
 
-        $transaksi = Transaction::whereYear('tanggal', $tahunIni)
+        // Ambil semua transaksi bulan ini + relasi item
+        $transaksi = Transaction::with('item')
+            ->whereYear('tanggal', $tahunIni)
             ->whereMonth('tanggal', $bulanIni)
             ->get();
 
+        // Inisialisasi array minggu ke-n
         $mingguan = [
             'Minggu 1' => 0,
             'Minggu 2' => 0,
@@ -73,24 +76,45 @@ class TransactionController extends Controller
         foreach ($transaksi as $trx) {
             $tanggal = Carbon::parse($trx->tanggal);
             $mingguKe = ceil($tanggal->day / 7);
-
             $label = 'Minggu ' . $mingguKe;
 
-            $keuntungan = $trx->total_harga - ($trx->harga_kulak * $trx->jumlah);
-
-            if (isset($mingguan[$label])) {
-                $mingguan[$label] += $keuntungan;
+            // Pastikan item tidak null
+            if ($trx->item) {
+                $keuntungan = $trx->total_harga - ($trx->item->harga_beli * $trx->jumlah);
+                if (isset($mingguan[$label])) {
+                    $mingguan[$label] += $keuntungan;
+                }
             }
         }
 
         $labels = array_keys($mingguan);
         $data = array_values($mingguan);
 
+        // Total Pendapatan (semua waktu)
         $totalPendapatan = Transaction::sum('total_harga');
+
+        // Total Barang (sisa stok semua barang)
         $totalBarang = Item::sum('stok');
-        $totalKeuntungan = Transaction::sum(DB::raw('total_harga - harga_kulak'));
+
+        // Total Harga Modal
         $totalHargaBarang = Item::sum(DB::raw('harga_beli * stok'));
 
-        return view('dashboard.index', compact('labels', 'data', 'totalPendapatan', 'totalBarang', 'totalKeuntungan', 'totalHargaBarang'));
+        // Total Keuntungan (tanpa simpan di DB)
+        $allTransactions = Transaction::with('item')->get();
+        $totalKeuntungan = 0;
+        foreach ($allTransactions as $trx) {
+            if ($trx->item) {
+                $totalKeuntungan += $trx->total_harga - ($trx->item->harga_beli * $trx->jumlah);
+            }
+        }
+
+        return view('dashboard.index', compact(
+            'labels',
+            'data',
+            'totalPendapatan',
+            'totalBarang',
+            'totalKeuntungan',
+            'totalHargaBarang'
+        ));
     }
 }

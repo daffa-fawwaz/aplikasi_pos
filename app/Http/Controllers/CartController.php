@@ -6,9 +6,11 @@ use App\Models\CartItem;
 use App\Models\Item;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\File;
+
 
 class CartController extends Controller
 {
@@ -21,23 +23,32 @@ class CartController extends Controller
     public function add(Request $request, Item $item)
     {
         $request->validate([
-            'jumlah' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        // Cek apakah item sudah ada di cart
+        // Cek apakah stok cukup
+        if ($item->stok < $request->quantity) {
+            return back()->with('error', 'Stok tidak mencukupi.');
+        }
+
+        // Kurangi stok
+        $item->stok -= $request->quantity;
+        $item->save();
+
+        // Tambahkan ke keranjang
         $cartItem = CartItem::where('item_id', $item->id)->first();
 
         if ($cartItem) {
-            $cartItem->jumlah += $request->jumlah;
+            $cartItem->quantity += $request->quantity;
             $cartItem->save();
         } else {
             CartItem::create([
                 'item_id' => $item->id,
-                'jumlah' => $request->jumlah,
+                'quantity' => $request->quantity,
             ]);
         }
 
-        return back()->with('success', 'Item berhasil ditambahkan ke keranjang.');
+        return back()->with('success', 'Item berhasil ditambahkan ke keranjang dan stok dikurangi.');
     }
 
     public function remove(CartItem $cartItem)
@@ -46,10 +57,26 @@ class CartController extends Controller
         return redirect()->route('cart.index')->with('success', 'Barang di keranjang berhasil dihapus');
     }
 
-    public function checkout()
+    public function updateHarga(Request $request, $id)
     {
+        $request->validate([
+            'harga_manual' => 'required|integer|min:0',
+        ]);
 
-        DB::beginTransaction();
+        $cartItem = CartItem::findOrFail($id);
+        $cartItem->harga_manual = $request->harga_manual;
+        $cartItem->save();
+
+        return back()->with('success', 'Harga berhasil diperbarui.');
+    }
+
+    public function checkout(Request $request)
+    {
+        $request->validate([
+            'nama_pembeli' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:20',
+            'alamat' => 'required|string',
+        ]);
 
         try {
             $cartItems = CartItem::with('item')->get();
@@ -58,41 +85,55 @@ class CartController extends Controller
                 return back()->with('error', 'Keranjang kosong.');
             }
 
+            $transactions = [];
+
             foreach ($cartItems as $cartItem) {
                 $item = $cartItem->item;
 
-                if (!$item) {
-                    return back()->with('error', "Item tidak ditemukan.");
+                if ($cartItem->harga_manual === null) {
+                    return back()->with('error', "Harga belum diisi untuk {$item->nama_barang}.");
                 }
 
-                if ($item->stok < $cartItem->quantity) {
-                    return back()->with('error', "Stok tidak cukup untuk {$item->nama_barang}.");
+                $harga = $cartItem->harga_manual;
+
+                if ($harga < $item->harga_beli) {
+                    return back()->with('error', "Harga jual untuk '{$item->nama_barang}' tidak boleh lebih kecil dari harga kulak (Rp " . number_format($item->harga_beli, 0, ',', '.') . ").");
                 }
 
-                $item->stok -= $cartItem->quantity;
-                $item->save();
-
-                $transaction = Transaction::create([
+                $transactions[] = Transaction::create([
                     'item_id' => $item->id,
                     'jumlah' => $cartItem->quantity,
-                    'total_harga' => $item->harga_jual * $cartItem->quantity,
-                    'harga_kulak' => $item->harga_beli,
+                    'total_harga' => $harga, // Tidak dikali quantity
+                    'harga_satuan' => $harga,
                     'tanggal' => Carbon::now()->toDateString(),
+                    'nama_pembeli' => $request->nama_pembeli,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
                 ]);
-
-                $transactions[] = $transaction;
             }
 
             CartItem::truncate();
 
-            $lastTransaction = end($transactions);
-            $transaction = Transaction::with('item')->find($lastTransaction->id);
+            $total = collect($transactions)->sum('total_harga');
 
-            $pdf = PDF::loadView('cart.nota', ['transactions' => $transactions]);
-            return $pdf->download('nota-transaksi.pdf');
+            $notaText = View::make('cart.nota_template', [
+                'tanggal' => now()->format('d M y'),
+                'nama_pembeli' => $request->nama_pembeli,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+                'transactions' => $transactions,
+                'total' => $total,
+            ])->render();
+
+            $filename = storage_path('app/nota_' . now()->timestamp . '.txt');
+            File::put($filename, $notaText);
+
+            $printerName = 'EPSON_L5290_Series';
+            exec("lp -o cpi=12 -o lpi=6 -o page-left=20 -d " . escapeshellarg($printerName) . " " . escapeshellarg($filename));
+
+            return back()->with('success', 'Checkout dan cetak nota berhasil.');
         } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
+            return back()->with('error', 'Checkout gagal: ' . $e->getMessage());
         }
     }
 }

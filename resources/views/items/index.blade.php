@@ -114,7 +114,7 @@
                                     </td> -->
                                     <td class="px-6 py-4">{{$item->tanggal_order}}</td>
 
-                                    <td class="px-2 py-4 flex gap-1">
+                                    <td class="px-2 py-4 flex gap-3">
                                         <form action="{{ route('items.destroy', $item) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
@@ -122,23 +122,30 @@
                                                 class="text-red-500 hover:text-red-700 font-medium text-sm px-2 py-1 border border-red-500 rounded">Hapus</button>
                                         </form>
                                         <a href="{{ route('items.checkout', $item->id) }}" class="bg-blue-600 text-white px-2 py-1 ml-2 rounded hover:bg-green-700">Checkout</a>
-                                        <!-- <form action="{{ route('cart.add', $item->id) }}" method="POST">
+                                        <form action="{{ route('cart.add', $item->id) }}" method="POST" class="px-4">
                                             @csrf
                                             <input type="hidden" name="item_id" value="{{ $item->id }}">
-                                            <input type="number" name="jumlah" value="1" min="1">
-                                            <button type="submit" class="btn btn-primary">+ Keranjang</button>
-                                        </form> -->
+                                            <input class="hidden" type="number" name="quantity" value="1" min="1">
+                                            <button type="submit" class="border px-4 py-1 flex justify-center items-center text-black">+</button>
+                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <div class="w-32 mt-6 mb-5 ml-2">
-                            <a href="{{ route('items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
-                                + Tambah Barang
-                            </a>
+                    <div class="flex items-center">
+                        <div class="flex">
+                            <div class="mt-6 mb-5 ml-2">
+                                <a href="{{ route('items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
+                                    + Tambah Barang
+                                </a>
+                            </div>
+                            <div class="mt-6 mb-5 ml-2">
+                                <a href="{{ route('cart.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
+                                    + Cetak Nota
+                                </a>
+                            </div>
                         </div>
                         <div class="mt-3">
                             {{ $items->links() }}
