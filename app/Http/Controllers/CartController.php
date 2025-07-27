@@ -72,6 +72,21 @@ class CartController extends Controller
 
     public function checkout(Request $request)
     {
+        $action = $request->input('action');
+
+        if ($action === 'dotmatrix') {
+            // Panggil logic cetak nota biasa (misalnya PDF)
+            return $this->dotmatrix($request);
+        } elseif ($action === 'thermal') {
+            // Panggil logic cetak nota thermal (format TXT / ESC/POS)
+            return $this->thermal($request);
+        }
+
+        return back()->with('error', 'Aksi tidak dikenali.');
+    }
+
+    public function dotmatrix(Request $request)
+    {
         $request->validate([
             'nama_pembeli' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
@@ -79,6 +94,10 @@ class CartController extends Controller
         ]);
 
         try {
+            $namaPembeli = strtoupper($request->nama_pembeli);
+            $noHp = strtoupper($request->no_hp);
+            $alamat = strtoupper($request->alamat);
+
             $cartItems = CartItem::with('item')->get();
 
             if ($cartItems->isEmpty()) {
@@ -102,6 +121,9 @@ class CartController extends Controller
 
                 $transactions[] = Transaction::create([
                     'item_id' => $item->id,
+                    'nama_pembeli' => $request->nama_pembeli,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
                     'jumlah' => $cartItem->quantity,
                     'total_harga' => $harga, // Tidak dikali quantity
                     'harga_satuan' => $harga,
@@ -118,9 +140,9 @@ class CartController extends Controller
 
             $notaText = View::make('cart.nota_template', [
                 'tanggal' => now()->format('d M y'),
-                'nama_pembeli' => $request->nama_pembeli,
-                'no_hp' => $request->no_hp,
-                'alamat' => $request->alamat,
+                'nama_pembeli' => $namaPembeli,
+                'no_hp' => $noHp,
+                'alamat' => $alamat,
                 'transactions' => $transactions,
                 'total' => $total,
             ])->render();
@@ -129,6 +151,82 @@ class CartController extends Controller
             File::put($filename, $notaText);
 
             $printerName = 'EPSON_L5290_Series';
+            exec("lp -o cpi=12 -o lpi=6 -o page-left=20 -d " . escapeshellarg($printerName) . " " . escapeshellarg($filename));
+
+            return back()->with('success', 'Checkout dan cetak nota berhasil.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Checkout gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function thermal(Request $request)
+    {
+        $request->validate([
+            'nama_pembeli' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:20',
+            'alamat' => 'required|string',
+        ]);
+
+        try {
+            $namaPembeli = strtoupper($request->nama_pembeli);
+            $noHp = strtoupper($request->no_hp);
+            $alamat = strtoupper($request->alamat);
+
+            $cartItems = CartItem::with('item')->get();
+
+            if ($cartItems->isEmpty()) {
+                return back()->with('error', 'Keranjang kosong.');
+            }
+
+            $transactions = [];
+
+            foreach ($cartItems as $cartItem) {
+                $item = $cartItem->item;
+
+                if ($cartItem->harga_manual === null) {
+                    return back()->with('error', "Harga belum diisi untuk {$item->nama_barang}.");
+                }
+
+                $harga = $cartItem->harga_manual;
+
+                if ($harga < $item->harga_beli) {
+                    return back()->with('error', "Harga jual untuk '{$item->nama_barang}' tidak boleh lebih kecil dari harga kulak (Rp " . number_format($item->harga_beli, 0, ',', '.') . ").");
+                }
+
+                $transactions[] = Transaction::create([
+                    'item_id' => $item->id,
+                    'nama_pembeli' => $request->nama_pembeli,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
+                    'jumlah' => $cartItem->quantity,
+                    'total_harga' => $harga * $cartItem->quantity,
+                    'harga_satuan' => $harga,
+                    'tanggal' => Carbon::now()->toDateString(),
+                ]);
+            }
+
+            // Bersihkan keranjang
+            CartItem::truncate();
+
+            // Hitung total seluruh transaksi
+            $total = collect($transactions)->sum('total_harga');
+
+            // Render Blade ke string untuk isi file nota
+            $notaText = View::make('cart.nota_thermal', [
+                'tanggal' => now()->format('d M Y'),
+                'nama_pembeli' => $namaPembeli,
+                'no_hp' => $noHp,
+                'alamat' => $alamat,
+                'transactions' => $transactions,
+                'total' => $total,
+            ])->render();
+
+            // Simpan ke file .txt
+            $filename = storage_path('app/nota_' . now()->timestamp . '.txt');
+            File::put($filename, $notaText);
+
+            // Cetak ke printer thermal
+            $printerName = 'EPSON_L5290_Series'; // Ganti sesuai printer kamu
             exec("lp -o cpi=12 -o lpi=6 -o page-left=20 -d " . escapeshellarg($printerName) . " " . escapeshellarg($filename));
 
             return back()->with('success', 'Checkout dan cetak nota berhasil.');

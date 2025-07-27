@@ -52,7 +52,7 @@
                                     <th class="px-6 py-3">Tipe</th>
                                     <th class="px-6 py-3">Stok Barang</th>
                                     <th class="px-6 py-3">Harga Kulak</th>
-                                    <!-- <th class="px-6 py-3">Harga Jual</th> -->
+                                    <th class="px-6 py-3">Harga Jual</th>
                                     <th class="px-6 py-3">Tanggal kulak</th>
                                     <th class="px-6 py-3">Aksi</th>
                                 </tr>
@@ -110,8 +110,8 @@
                                     </td>
                                     <td class="px-6 py-4">Rp {{ number_format($item->harga_beli, 0, ',', '.') }}
                                     </td>
-                                    <!-- <td class="px-6 py-4">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}
-                                    </td> -->
+                                    <td class="px-6 py-4">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}
+                                    </td>
                                     <td class="px-6 py-4">{{$item->tanggal_order}}</td>
 
                                     <td class="px-2 py-4 flex gap-3">

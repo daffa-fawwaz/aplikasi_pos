@@ -42,6 +42,7 @@ class TransactionController extends Controller
             'item_id' => $item->id,
             'jumlah' => $request->jumlah_beli,
             'total_harga' => number_format((float) $request->total_harga, 2, '.', ''),
+            'harga_satuan' => $request->total_harga,
             'harga_kulak' => $item->harga_beli,
             'tanggal' => $request->tanggal,
         ]);

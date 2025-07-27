@@ -5,7 +5,7 @@ return str_pad($text, $length, ' ', $padType);
 }
 @endphp
 
-PUTRA ANUGERAH JAYA
+TOKO SONI ELEKTRONIK
 
 KEPADA YTH:
 
@@ -26,6 +26,6 @@ NOTA
 TOTAL {{ pad('', 60) }}Rp {{ number_format($total, 0, ',', '.') }}
 
 BANK BCA: 4480 880 250 AN. BANK 2037186485
-ATAS NAMA: PUTRA ANUGERAH JAYA CV
+ATAS NAMA: SONI STIAWAN
 
 (TERIMA KASIH)

@@ -9,6 +9,9 @@ class Transaction extends Model
     protected $fillable = [
         'item_id',
         'jumlah',
+        'nama_pembeli',
+        'no_hp',
+        'alamat',
         'total_harga',
         'harga_satuan',
         'tanggal',

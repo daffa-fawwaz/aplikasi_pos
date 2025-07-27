@@ -109,7 +109,8 @@
                                 <input type="text" name="alamat" required class="w-full border rounded px-3 py-2">
                             </div>
                         </div>
-                        <button type="submit" class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Checkout</button>
+                        <button type="submit" name="action" value="dotmatrix" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-green-700">Dotmatrix</button>
+                        <button type="submit" name="action" value="thermal" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-green-700">Thermal</button>
                     </form>
                     @endif
                 </div>

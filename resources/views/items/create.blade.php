@@ -68,10 +68,10 @@
                             <input type="text" name="harga_beli" class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" value="{{ old('destination') }}" placeholder="Masukkan harga kulak" required>
                         </label>
 
-                        <!-- <label class="block text-sm">
+                        <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Harga Jual</span>
                             <input type="text" name="harga_jual" id="harga_jual" class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" placeholder="Masukkan harga jual" required>
-                        </label> -->
+                        </label>
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Tanggal Kulak</span>
