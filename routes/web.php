@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\BarcodeController;
 
 Route::get('/', [TransactionController::class, 'chartPendapatanBulanan'])->name('grafik.pendapatan');
 
@@ -25,3 +26,7 @@ Route::post('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name(
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/cart/nota/{transaction}', [CartController::class, 'printNota'])->name('cart.nota');
 Route::put('/cart/update-harga/{id}', [CartController::class, 'updateHarga'])->name('cart.updateHarga');
+
+// Fitur Scan Barcode Barang
+Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+Route::get('/barcode/search', [BarcodeController::class, 'search'])->name('barcode.search');
