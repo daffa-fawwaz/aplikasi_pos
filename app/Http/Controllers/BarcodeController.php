@@ -14,21 +14,25 @@ class BarcodeController extends Controller
 
     public function search(Request $request)
     {
-        $barcode = $request->query('barcode') ?? $request->input('barcode');
+        // Ambil input barcode dari query string atau form
+        $barcode = trim($request->query('barcode') ?? $request->input('barcode'));
+
+        // Validasi jika barcode kosong
+        if (!$barcode) {
+            return response()->json([
+                'message' => 'Barcode tidak diberikan'
+            ], 400);
+        }
+
+        // Cari barang berdasarkan barcode
         $item = Item::where('barcode', $barcode)->first();
 
-        // Jika request via AJAX
-        if ($request->ajax() || $request->wantsJson()) {
-            return $item
-                ? response()->json($item)
-                : response()->json(['message' => 'Barang tidak ditemukan'], 404);
-        }
-
-        // Jika request normal (non-AJAX), tampilkan halaman detail atau redirect dengan pesan error
         if ($item) {
-            return view('items.show', compact('item'));
+            return response()->json($item); // Return item langsung
         }
 
-        return redirect()->back()->with('error', 'Barang dengan barcode ini tidak ditemukan!');
+        return response()->json([
+            'message' => 'Barang tidak ditemukan'
+        ], 404);
     }
 }

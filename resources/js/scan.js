@@ -6,25 +6,73 @@ let isScanning = false;
 function showItemDetail(item) {
     const container = document.getElementById("item-detail");
     const content = document.getElementById("item-content");
+    const backdrop = document.getElementById("modal-backdrop");
+
     content.innerHTML = `
-        <p><strong>Nama:</strong> ${item.nama_barang}</p>
-        <p><strong>Tipe:</strong> ${item.tipe_barang ?? "-"}</p>
-        <p><strong>Harga Jual:</strong> Rp ${new Intl.NumberFormat(
-            "id-ID"
-        ).format(item.harga_jual)}</p>
-        <p><strong>Stok:</strong> ${item.stok}</p>
+        <div class="space-y-4">
+            <div class="flex justify-between py-2 border-b dark:border-gray-700">
+                <span class="text-gray-600 dark:text-gray-400">Nama Barang</span>
+                <span class="font-medium text-gray-900 dark:text-white">${
+                    item.nama_barang
+                }</span>
+            </div>
+            <div class="flex justify-between py-2 border-b dark:border-gray-700">
+                <span class="text-gray-600 dark:text-gray-400">Tipe</span>
+                <span class="font-medium text-gray-900 dark:text-white">${
+                    item.tipe_barang ?? "-"
+                }</span>
+            </div>
+            <div class="flex justify-between py-2 border-b dark:border-gray-700">
+                <span class="text-gray-600 dark:text-gray-400">Harga</span>
+                <span class="font-medium text-gray-900 dark:text-white">Rp ${new Intl.NumberFormat(
+                    "id-ID"
+                ).format(item.harga_jual)}</span>
+            </div>
+            <div class="flex justify-between py-2 border-b dark:border-gray-700">
+                <span class="text-gray-600 dark:text-gray-400">Stok</span>
+                <span class="font-medium text-gray-900 dark:text-white">${
+                    item.stok
+                }</span>
+            </div>
+        </div>
     `;
-    container.style.display = "block";
+
+    // Show backdrop and modal
+    backdrop.classList.remove("hidden");
+    container.classList.remove("hidden");
+    container.classList.add("flex");
+}
+
+function closeDetail() {
+    const container = document.getElementById("item-detail");
+    const backdrop = document.getElementById("modal-backdrop");
+
+    // Hide backdrop and modal
+    backdrop.classList.add("hidden");
+    container.classList.add("hidden");
+    container.classList.remove("flex");
+}
+
+// Add this to your existing functions
+function addToCart() {
+    alert("Fitur akan segera tersedia!");
+    closeDetail();
 }
 
 function fetchItem(barcode) {
     fetch(`/barcode/search?barcode=${encodeURIComponent(barcode)}`)
-        .then((response) => {
-            if (!response.ok) throw new Error("Barang tidak ditemukan");
-            return response.json();
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.message) {
+                // Jika ada pesan error
+                throw new Error(data.message);
+            }
+            showItemDetail(data); // Data langsung adalah item
         })
-        .then((data) => showItemDetail(data))
-        .catch((error) => alert(error.message));
+        .catch((error) => {
+            alert(error.message || "Terjadi kesalahan saat mencari barang");
+            console.error("Error:", error);
+        });
 }
 
 async function startCamera() {
@@ -43,6 +91,8 @@ async function startCamera() {
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (decodedText) => {
+                console.log("Scanned code:", decodedText);
+
                 if (isScanning) {
                     isScanning = false;
                     stopCamera();
