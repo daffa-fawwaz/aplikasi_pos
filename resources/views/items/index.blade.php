@@ -5,32 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DashAdmin</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./../../assets/css/tailwind.output.css" />
-    <script
-        src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
-        defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="./../../assets/js/init-alpine.js"></script>
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
-        defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
     <script src="./../../assets/js/charts-lines.js" defer></script>
     <script src="./../../assets/js/charts-pie.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 </head>
 
 <body>
-    <div
-        class="flex h-screen bg-gray-50 dark:bg-gray-900"
-        :class="{ 'overflow-hidden': isSideMenuOpen }">
+    <div class="flex h-screen bg-gray-50 dark:bg-gray-900" :class="{ 'overflow-hidden': isSideMenuOpen }">
         <!-- sidebar -->
         @include('components.sidebar')
         <div class="flex flex-col flex-1 w-full">
@@ -40,13 +29,14 @@
                 <div class="container px-6 mx-auto grid">
                     <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">Daftar Barang</h2>
 
-                    @if(session('success'))
-                    <div class="mb-4 text-green-600 dark:text-green-400">{{ session('success') }}</div>
+                    @if (session('success'))
+                        <div class="mb-4 text-green-600 dark:text-green-400">{{ session('success') }}</div>
                     @endif
 
                     <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg">
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                            <thead
+                                class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
                                 <tr>
                                     <th class="px-6 py-3">Nama Barang</th>
                                     <th class="px-6 py-3">Tipe</th>
@@ -114,22 +104,26 @@
                                     </td>
                                     <td class="px-6 py-4">{{$item->tanggal_order}}</td>
 
-                                    <td class="px-2 py-4 flex gap-3">
-                                        <form action="{{ route('items.destroy', $item) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-500 hover:text-red-700 font-medium text-sm px-2 py-1 border border-red-500 rounded">Hapus</button>
-                                        </form>
-                                        <a href="{{ route('items.checkout', $item->id) }}" class="bg-blue-600 text-white px-2 py-1 ml-2 rounded hover:bg-green-700">Checkout</a>
-                                        <form action="{{ route('cart.add', $item->id) }}" method="POST" class="px-4">
-                                            @csrf
-                                            <input type="hidden" name="item_id" value="{{ $item->id }}">
-                                            <input class="hidden" type="number" name="quantity" value="1" min="1">
-                                            <button type="submit" class="border px-4 py-1 flex justify-center items-center text-black">+</button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                        <td class="px-2 py-4 flex gap-3">
+                                            <form action="{{ route('items.destroy', $item) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="text-red-500 hover:text-red-700 font-medium text-sm px-2 py-1 border border-red-500 rounded">Hapus</button>
+                                            </form>
+                                            <a href="{{ route('items.checkout', $item->id) }}"
+                                                class="bg-blue-600 text-white px-2 py-1 ml-2 rounded hover:bg-green-700">Checkout</a>
+                                            <form action="{{ route('cart.add', $item->id) }}" method="POST"
+                                                class="px-4">
+                                                @csrf
+                                                <input type="hidden" name="item_id" value="{{ $item->id }}">
+                                                <input class="hidden" type="number" name="quantity" value="1"
+                                                    min="1">
+                                                <button type="submit"
+                                                    class="border px-4 py-1 flex justify-center items-center text-black">+</button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -137,13 +131,21 @@
                     <div class="flex items-center">
                         <div class="flex">
                             <div class="mt-6 mb-5 ml-2">
-                                <a href="{{ route('items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
+                                <a href="{{ route('items.create') }}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
                                     + Tambah Barang
                                 </a>
                             </div>
                             <div class="mt-6 mb-5 ml-2">
-                                <a href="{{ route('cart.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
+                                <a href="{{ route('cart.index') }}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
                                     + Cetak Nota
+                                </a>
+                            </div>
+                            <div class="mt-6 mb-5 ml-2">
+                                <a href="{{ route('barcode.index') }}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-200">
+                                    Scan Barcode
                                 </a>
                             </div>
                         </div>
