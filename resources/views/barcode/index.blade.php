@@ -179,8 +179,9 @@
     </div>
     </div>
 
-    <link rel="stylesheet" href="{{ secure_asset('build/assets/app-Duf7wj54.css') }}">
-    <script type="module" src="{{ secure_asset('build/assets/app-BJokM-Mc.js') }}"></script>
+    {{-- Masih harus diubah ubah --}}
+    <link rel="stylesheet" href="{{ secure_asset('build/assets/app--35BGzCN.css') }}">
+    <script src="{{ secure_asset('build/assets/app-BTo6hh71.js') }}"></script>
 </body>
 
 </html>

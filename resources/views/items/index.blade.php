@@ -14,7 +14,6 @@
     <script src="./../../assets/js/charts-lines.js" defer></script>
     <script src="./../../assets/js/charts-pie.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 </head>
