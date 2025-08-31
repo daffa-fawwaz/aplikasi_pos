@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="./../assets/js/init-alpine.js"></script>
 
+    @vite(['resources/css/app.css', 'resources/js/barcode-search.js'])
+
     <style>
         #reader {
             width: 100%;
@@ -178,10 +180,6 @@
         </main>
     </div>
     </div>
-
-    {{-- Masih harus diubah ubah --}}
-    <link rel="stylesheet" href="{{ secure_asset('build/assets/app--35BGzCN.css') }}">
-    <script src="{{ secure_asset('build/assets/app-BTo6hh71.js') }}"></script>
 </body>
 
 </html>

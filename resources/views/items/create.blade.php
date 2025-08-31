@@ -4,23 +4,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DashAdmin - Input Barang</title>
-
-    <!-- Google Fonts -->
+    <title>DashAdmin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-    <!-- Tailwind CSS -->
-    @vite('resources/css/app.css')
-
-    <!-- Alpine.js -->
-    <script src="{{ asset('assets/js/init-alpine.js') }}" defer></script>
+    <link rel="stylesheet" href="./../assets/css/tailwind.output.css" />
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script src="./../assets/js/init-alpine.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
 
-    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
+    <script src="./../assets/js/charts-lines.js" defer></script>
+    <script src="./../assets/js/charts-pie.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Custom JS -->
-    @vite('resources/js/create-barcode.js')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('assets/js/script.js') }}"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 </head>
 
 <body>
@@ -62,6 +60,29 @@
                         </label>
 
                         <label class="block text-sm">
+                            <span class="text-gray-700 dark:text-gray-400">Barcode</span>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" id="barcodeInput" name="barcode"
+                                    class="block w-full text-sm dark:border-gray-600 dark:bg-gray-700 
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    placeholder="Scan atau masukkan barcode" />
+
+                                <button type="button" id="start-scan"
+                                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                                    Scan
+                                </button>
+                                <button type="button" id="stop-scan"
+                                    class="hidden bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                                    Stop
+                                </button>
+                            </div>
+                        </label>
+
+                        <!-- Reader kamera -->
+                        <div id="reader" class="mt-3 hidden"></div>
+
+                        <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Harga Kulak</span>
                             <input type="text" name="harga_beli"
                                 class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
@@ -97,20 +118,6 @@
                             </div>
                         </label>
 
-                        <!-- Barcode Input + Scan -->
-                        <label class="block text-sm">
-                            <span class="text-gray-700 dark:text-gray-400">Barcode</span>
-                            <div class="flex gap-2 mt-1">
-                                <input type="text" name="barcode" id="barcode" class="form-input flex-1"
-                                    value="{{ old('barcode') }}" placeholder="Scan atau masukkan barcode barang"
-                                    autofocus>
-                                <button type="button" id="start-scan" class="btn-green">Scan</button>
-                                <button type="button" id="stop-scan" class="btn-red hidden">Stop</button>
-                            </div>
-                        </label>
-
-                        <!-- Area kamera -->
-                        <div id="reader" class="mt-4 hidden border rounded"></div>
 
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                             Tambah Barang
@@ -123,6 +130,56 @@
 
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let html5QrCode = null;
+            let isScanning = false;
+
+            async function startCamera() {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+
+                const cameras = await Html5Qrcode.getCameras();
+                if (cameras && cameras.length) {
+                    isScanning = true;
+                    document.getElementById("reader").classList.remove("hidden");
+                    document.getElementById("stop-scan").classList.remove("hidden");
+                    document.getElementById("start-scan").classList.add("hidden");
+
+                    await html5QrCode.start({
+                            facingMode: "environment"
+                        }, {
+                            fps: 10,
+                            qrbox: 250
+                        },
+                        (decodedText) => {
+                            if (isScanning) {
+                                document.getElementById("barcodeInput").value = decodedText;
+                                stopCamera();
+                            }
+                        },
+                        (error) => console.warn("Scan error:", error)
+                    );
+                } else {
+                    alert("Tidak ada kamera tersedia.");
+                }
+            }
+
+            async function stopCamera() {
+                if (html5QrCode) {
+                    await html5QrCode.stop();
+                    document.getElementById("reader").classList.add("hidden");
+                    document.getElementById("stop-scan").classList.add("hidden");
+                    document.getElementById("start-scan").classList.remove("hidden");
+                    isScanning = false;
+                }
+            }
+
+            document.getElementById("start-scan").addEventListener("click", startCamera);
+            document.getElementById("stop-scan").addEventListener("click", stopCamera);
+        });
+
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.rupiah-input').forEach(function(input) {
                 input.addEventListener('input', function(e) {

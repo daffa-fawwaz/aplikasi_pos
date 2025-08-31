@@ -5,19 +5,23 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
     plugins: [
         laravel({
-            input: ["resources/css/app.css", "resources/js/app.js"],
+            input: [
+                "resources/css/app.css",
+                "resources/js/app.js",
+                "resources/js/barcode-search.js",
+                "resources/js/barcode-create.js",
+            ],
             refresh: true,
         }),
         tailwindcss(),
     ],
     server: {
-        https: true, // gunakan HTTPS
-        host: true, // supaya bisa diakses network/ngrok
-        port: 5173, // port default Vite
+        host: true, // biar bisa diakses dari luar (ngrok, LAN, dll)
+        port: 5173,
         hmr: {
-            protocol: "wss", // WebSocket secure untuk HMR
-            host: "localhost",
-            port: 5173, // port dev server Vite
+            protocol: "wss", // biar websocket jalan di HTTPS ngrok
+            host: "https://8c9339c269f4.ngrok-free.app", // ganti sesuai subdomain ngrok aktif
+            port: 443, // HMR lewat port default HTTPS
         },
     },
     build: {
