@@ -13,6 +13,7 @@ class Item extends Model
         'harga_beli',
         'tanggal_order',
         'stok',
+        'barcode'
     ];
 
     public function transactions()

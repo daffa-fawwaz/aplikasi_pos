@@ -5,32 +5,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DashAdmin</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./../assets/css/tailwind.output.css" />
-    <script
-        src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
-        defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="./../assets/js/init-alpine.js"></script>
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
-        defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
     <script src="./../assets/js/charts-lines.js" defer></script>
     <script src="./../assets/js/charts-pie.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ asset('assets/js/script.js') }}"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 </head>
 
 <body>
-    <div
-        class="flex h-screen bg-gray-50 dark:bg-gray-900"
-        :class="{ 'overflow-hidden': isSideMenuOpen }">
+    <div class="flex h-screen bg-gray-50 dark:bg-gray-900" :class="{ 'overflow-hidden': isSideMenuOpen }">
         <!-- sidebar -->
         @include('components.sidebar')
         <div class="flex flex-col flex-1 w-full">
@@ -41,13 +33,13 @@
                     <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Input Barang</h1>
 
                     @if ($errors->any())
-                    <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                        <ul class="list-disc pl-5">
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                            <ul class="list-disc pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     @endif
 
                     <form action="{{ route('items.store') }}" method="POST" class="space-y-4">
@@ -55,39 +47,74 @@
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Nama Barang</span>
-                            <input type="text" name="nama_barang" class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" value="{{ old('destination') }}" placeholder="Masukkan nama barang" required>
+                            <input type="text" name="nama_barang"
+                                class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                value="{{ old('destination') }}" placeholder="Masukkan nama barang" required>
                         </label>
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Tipe</span>
-                            <input type="text" name="tipe_barang" class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" value="{{ old('destination') }}" placeholder="Masukkan tipe barang" required>
+                            <input type="text" name="tipe_barang"
+                                class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                value="{{ old('destination') }}" placeholder="Masukkan tipe barang" required>
                         </label>
 
                         <label class="block text-sm">
+                            <span class="text-gray-700 dark:text-gray-400">Barcode</span>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" id="barcodeInput" name="barcode"
+                                    class="block w-full text-sm dark:border-gray-600 dark:bg-gray-700 
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    placeholder="Scan atau masukkan barcode" />
+
+                                <button type="button" id="start-scan"
+                                    class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                                    Scan
+                                </button>
+                                <button type="button" id="stop-scan"
+                                    class="hidden bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                                    Stop
+                                </button>
+                            </div>
+                        </label>
+
+                        <!-- Reader kamera -->
+                        <div id="reader" class="mt-3 hidden"></div>
+
+                        <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Harga Kulak</span>
-                            <input type="text" name="harga_beli" class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" value="{{ old('destination') }}" placeholder="Masukkan harga kulak" required>
+                            <input type="text" name="harga_beli"
+                                class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                value="{{ old('destination') }}" placeholder="Masukkan harga kulak" required>
                         </label>
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Harga Jual</span>
-                            <input type="text" name="harga_jual" id="harga_jual" class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" placeholder="Masukkan harga jual" required>
+                            <input type="text" name="harga_jual" id="harga_jual"
+                                class="rupiah-input block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                placeholder="Masukkan harga jual" required>
                         </label>
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Tanggal Kulak</span>
-                            <input type="datetime-local" name="tanggal_order" class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input" value="{{ old('end_time') }}" required>
+                            <input type="datetime-local" name="tanggal_order"
+                                class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                value="{{ old('end_time') }}" required>
                         </label>
 
                         <label class="block text-sm">
                             <span class="text-gray-700 dark:text-gray-400">Jumlah Stok</span>
                             <div class="flex items-center mt-1">
-                                <button type="button" onclick="decreaseStok()" class="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-black dark:text-white rounded-l hover:bg-gray-400 dark:hover:bg-gray-500">−</button>
+                                <button type="button" onclick="decreaseStok()"
+                                    class="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-black dark:text-white rounded-l hover:bg-gray-400 dark:hover:bg-gray-500">−</button>
 
                                 <input type="number" id="stokInput" name="stok" min="0"
                                     class="w-16 text-center border-t border-b border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     value="{{ old('stok', 0) }}" required>
 
-                                <button type="button" onclick="increaseStok()" class="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-black dark:text-white rounded-r hover:bg-gray-400 dark:hover:bg-gray-500">+</button>
+                                <button type="button" onclick="increaseStok()"
+                                    class="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-black dark:text-white rounded-r hover:bg-gray-400 dark:hover:bg-gray-500">+</button>
                             </div>
                         </label>
 
@@ -103,6 +130,56 @@
 
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let html5QrCode = null;
+            let isScanning = false;
+
+            async function startCamera() {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+
+                const cameras = await Html5Qrcode.getCameras();
+                if (cameras && cameras.length) {
+                    isScanning = true;
+                    document.getElementById("reader").classList.remove("hidden");
+                    document.getElementById("stop-scan").classList.remove("hidden");
+                    document.getElementById("start-scan").classList.add("hidden");
+
+                    await html5QrCode.start({
+                            facingMode: "environment"
+                        }, {
+                            fps: 10,
+                            qrbox: 250
+                        },
+                        (decodedText) => {
+                            if (isScanning) {
+                                document.getElementById("barcodeInput").value = decodedText;
+                                stopCamera();
+                            }
+                        },
+                        (error) => console.warn("Scan error:", error)
+                    );
+                } else {
+                    alert("Tidak ada kamera tersedia.");
+                }
+            }
+
+            async function stopCamera() {
+                if (html5QrCode) {
+                    await html5QrCode.stop();
+                    document.getElementById("reader").classList.add("hidden");
+                    document.getElementById("stop-scan").classList.add("hidden");
+                    document.getElementById("start-scan").classList.remove("hidden");
+                    isScanning = false;
+                }
+            }
+
+            document.getElementById("start-scan").addEventListener("click", startCamera);
+            document.getElementById("stop-scan").addEventListener("click", stopCamera);
+        });
+
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.rupiah-input').forEach(function(input) {
                 input.addEventListener('input', function(e) {

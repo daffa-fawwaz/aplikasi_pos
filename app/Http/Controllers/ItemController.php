@@ -33,17 +33,24 @@ class ItemController extends Controller
         $validated = $request->validate([
             'nama_barang' => 'required',
             'tipe_barang' => 'required',
+            'barcode' => 'nullable|string|max:100|unique:items,barcode',
             'harga_beli' => 'required|numeric',
             'tanggal_order' => 'required|date',
             'stok' => 'required|integer|min:0',
         ]);
 
-        $existingItem = Item::where('nama_barang', $validated['nama_barang'])
-            ->where('tipe_barang', $validated['tipe_barang'])
-            ->first();
+        // cari barang existing berdasarkan barcode (kalau ada) 
+        // kalau barcode kosong, fallback ke nama_barang + tipe_barang
+        if (!empty($validated['barcode'])) {
+            $existingItem = Item::where('barcode', $validated['barcode'])->first();
+        } else {
+            $existingItem = Item::where('nama_barang', $validated['nama_barang'])
+                ->where('tipe_barang', $validated['tipe_barang'])
+                ->first();
+        }
 
         if ($existingItem) {
-            // Hitung harga beli total lama dan baru
+            // Hitung harga beli total lama dan baru (harga beli rata-rata)
             $stok_lama = $existingItem->stok;
             $harga_beli_lama = $existingItem->harga_beli;
 
@@ -64,6 +71,12 @@ class ItemController extends Controller
             $existingItem->stok = $total_stok;
             $existingItem->harga_beli = $harga_beli_baru_rata2;
             $existingItem->harga_jual = $harga_jual_baru;
+
+            // kalau barcode sebelumnya kosong, update pakai barcode baru
+            if (empty($existingItem->barcode) && !empty($validated['barcode'])) {
+                $existingItem->barcode = $validated['barcode'];
+            }
+
             $existingItem->save();
 
             return redirect('items')->with('success', 'Stok barang berhasil ditambahkan.');
@@ -133,6 +146,7 @@ class ItemController extends Controller
 
         $items = Item::where('nama_barang', 'like', "%$query%")
             ->orWhere('tipe_barang', 'like', "%$query%")
+            ->orWhere('barcode', 'like', "%$query%")
             ->get();
 
         $html = view('items.partials.table-rows', compact('items'))->render();
